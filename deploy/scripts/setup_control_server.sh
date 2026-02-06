@@ -113,7 +113,7 @@ systemctl enable --now "${SERVICE_NAME}"
 
 echo ""
 echo "==> Done."
-echo "API should be reachable locally at: http://127.0.0.1:8000"
+echo "API should be reachable loxcally at: http://0.0.0.0:8000"
 echo ""
 echo "Next steps:"
 echo "1) Edit: ${INSTALL_DIR}/cloudhand-api/.env"
