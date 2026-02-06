@@ -20,7 +20,7 @@ from routers.deps import get_current_user
 from schemas import Application as ApplicationSchema, ApplicationCreate
 from services.deployment import manager
 from services import onboarding as onboarding_service
-
+import sys
 router = APIRouter(tags=["applications"])
 
 @router.websocket("/ws/{application_id}")
@@ -368,7 +368,7 @@ async def apply_plan_direct(
 
     # Run: python -m cloudhand.cli apply <plan> --auto-approve
     proc = await asyncio.create_subprocess_exec(
-        "python",
+          sys.executable,
         "-m",
         "cloudhand.cli",
         "apply",
