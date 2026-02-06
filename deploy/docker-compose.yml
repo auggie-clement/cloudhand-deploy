@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cloudhand
+      POSTGRES_USER: cloudhand
+      POSTGRES_PASSWORD: cloudhand
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Optional: OpenBao (Vault-compatible) if you want secrets/key management in Vault
+  # openbao:
+  #   image: openbao/openbao:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8200:8200"
+  #   cap_add:
+  #     - IPC_LOCK
+  #   environment:
+  #     BAO_LOCAL_CONFIG: |
+  #       storage "file" { path = "/bao/data" }
+  #       listener "tcp" { address = "0.0.0.0:8200" tls_disable = 1 }
+  #       ui = true
+  #   volumes:
+  #     - baodata:/bao/data
+
+volumes:
+  pgdata:
+  # baodata:

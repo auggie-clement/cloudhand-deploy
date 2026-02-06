@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudhand API (control plane)
+After=network.target docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cloudhand-control-plane/cloudhand-api
+EnvironmentFile=/opt/cloudhand-control-plane/cloudhand-api/.env
+ExecStart=/opt/cloudhand-control-plane/cloudhand-api/.venv/bin/uvicorn src.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

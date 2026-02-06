@@ -1,0 +1,9 @@
+{
+  "name": "honest-herbalist",
+  "service_config": {
+    "server_names": [
+      "thehonestherbalist.com"
+    ],
+    "https": true
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "operations": [],
+  "new_spec": {
+    "provider": "hetzner",
+    "region": "fsn1",
+    "networks": [
+      {
+        "name": "default",
+        "cidr": "10.0.0.0/16"
+      }
+    ],
+    "instances": [
+      {
+        "name": "ubuntu-4gb-nbg1-1",
+        "size": "cx23",
+        "network": "default",
+        "region": "nbg1",
+        "labels": {},
+        "workloads": [
+          {
+            "name": "honest-herbalist",
+            "repo_url": "https://github.com/auggie-clement/temp-landing",
+            "branch": "main",
+            "runtime": "nodejs",
+            "build_config": {
+              "install_command": "npm install",
+              "build_command": "npm run build",
+              "system_packages": []
+            },
+            "service_config": {
+              "command": "npm run start",
+              "environment": {},
+              "ports": [
+                3000
+              ],
+              "server_names": [
+                "thehonestherbalist.com"
+              ],
+              "https": false
+            },
+            "destination_path": "/opt/apps"
+          }
+        ],
+        "maintenance": null
+      }
+    ],
+    "load_balancers": [],
+    "firewalls": [],
+    "dns_records": [],
+    "containers": []
+  }
+}
