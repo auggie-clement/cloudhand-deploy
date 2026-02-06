@@ -100,7 +100,7 @@ User=${APP_USER}
 Group=${APP_USER}
 WorkingDirectory=${INSTALL_DIR}/cloudhand-api
 EnvironmentFile=${INSTALL_DIR}/cloudhand-api/.env
-ExecStart=${INSTALL_DIR}/cloudhand-api/.venv/bin/uvicorn src.main:app --host 127.0.0.1 --port 8000
+ExecStart=${INSTALL_DIR}/cloudhand-api/.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=3
 
