@@ -26,8 +26,7 @@ apt-get update
 apt-get install -y \
   git curl unzip gnupg lsb-release \
   python3 python3-venv python3-pip \
-  nginx \
-  docker.io docker-compose-plugin
+  nginx 
 
 systemctl enable --now docker
 
