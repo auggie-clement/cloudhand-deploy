@@ -368,7 +368,8 @@ async def apply_plan_direct(
 
     # Run: python -m cloudhand.cli apply <plan> --auto-approve
     proc = await asyncio.create_subprocess_exec(
-          sys.executable,
+        sys.executable,
+        "-u",
         "-m",
         "cloudhand.cli",
         "apply",

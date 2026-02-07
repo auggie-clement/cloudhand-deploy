@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -139,7 +140,7 @@ class DeploymentManager:
                     # 1. ch scan
                     await self._append_log(db, deployment, app_id, "Running ch scan...", status="deploying")
                     rc = await self._run_cmd(
-                        ["python", "-m", "cloudhand.cli", "scan", "--provider", provider],
+                        [sys.executable, "-u", "-m", "cloudhand.cli", "scan", "--provider", provider],
                         cwd=root_dir,
                         env=env,
                         db=db,
@@ -153,7 +154,7 @@ class DeploymentManager:
                     # 2. ch sync-spec
                     await self._append_log(db, deployment, app_id, "Running ch sync-spec...")
                     rc = await self._run_cmd(
-                        ["python", "-m", "cloudhand.cli", "sync-spec"],
+                        [sys.executable, "-u", "-m", "cloudhand.cli", "sync-spec"],
                         cwd=root_dir,
                         env=env,
                         db=db,
@@ -181,7 +182,7 @@ class DeploymentManager:
 
                     await self._append_log(db, deployment, app_id, f"Running ch plan: {desc}")
                     rc = await self._run_cmd(
-                        ["python", "-m", "cloudhand.cli", "plan", desc],
+                        [sys.executable, "-u", "-m", "cloudhand.cli", "plan", desc],
                         cwd=root_dir,
                         env=env,
                         db=db,
@@ -210,7 +211,7 @@ class DeploymentManager:
                 # 4. ch apply
                 await self._append_log(db, deployment, app_id, f"Applying plan {plan_file.name} ...")
                 rc = await self._run_cmd(
-                    ["python", "-m", "cloudhand.cli", "apply", str(plan_file), "--auto-approve"],
+                    [sys.executable, "-u", "-m", "cloudhand.cli", "apply", str(plan_file), "--auto-approve"],
                     cwd=root_dir,
                     env=env,
                     db=db,

@@ -219,3 +219,8 @@ def apply(ctx: click.Context, plan_file: str, auto_approve: bool) -> None:
         raise click.ClickException(str(e))
 
 main = cli
+
+
+if __name__ == "__main__":
+    # Allow `python -m cloudhand.cli ...` (used by the control-plane API subprocess calls).
+    main()
