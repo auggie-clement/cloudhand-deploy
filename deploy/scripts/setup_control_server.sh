@@ -39,10 +39,20 @@ env_value() {
   echo "${val}"
 }
 
+is_truthy() {
+  local v="${1:-}"
+  v="$(echo "${v}" | tr '[:upper:]' '[:lower:]' | xargs || true)"
+  case "${v}" in
+    1|true|yes|y|on) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 configure_nginx_and_tls() {
   local domains_csv="$1"
   local certbot_email="$2"
-  local upstream_port="$3"
+  local certbot_unsafe_no_email="$3"
+  local upstream_port="$4"
 
   domains_csv=$(echo "${domains_csv}" | tr ',' ' ' | xargs || true)
   if [ -z "${domains_csv}" ]; then
@@ -82,14 +92,19 @@ NGINX
   nginx -t
   systemctl reload nginx || systemctl restart nginx
 
-  if [ -z "${certbot_email}" ] || [ "${certbot_email}" = "you@example.com" ]; then
-    echo "Skipping Let's Encrypt: set CERTBOT_EMAIL in ${INSTALL_DIR}/cloudhand-api/.env"
-    return 0
-  fi
-
   echo "==> Installing certbot (nginx plugin)..."
   apt-get update
   apt-get install -y certbot python3-certbot-nginx
+
+  local email_args=()
+  if [ -n "${certbot_email}" ] && [ "${certbot_email}" != "you@example.com" ]; then
+    email_args=(--email "${certbot_email}")
+  elif is_truthy "${certbot_unsafe_no_email}"; then
+    email_args=(--register-unsafely-without-email)
+  else
+    echo "Skipping Let's Encrypt: set CERTBOT_EMAIL (recommended) or set CERTBOT_UNSAFE_NO_EMAIL=1 to register without email."
+    return 0
+  fi
 
   # Build certbot -d args from the space-separated domains list.
   local domain_args=()
@@ -100,7 +115,7 @@ NGINX
   echo "==> Requesting/renewing Let's Encrypt certificate via certbot..."
   set +e
   certbot --nginx "${domain_args[@]}" \
-    --non-interactive --agree-tos --email "${certbot_email}" \
+    --non-interactive --agree-tos "${email_args[@]}" \
     --redirect --keep-until-expiring
   local rc=$?
   set -e
@@ -111,7 +126,7 @@ NGINX
     echo "      - DNS A record points at this server"
     echo "      - ports 80/tcp and 443/tcp are reachable from the internet"
     echo "      Then re-run:"
-    echo "        certbot --nginx ${domain_args[*]} --non-interactive --agree-tos --email \"${certbot_email}\" --redirect --keep-until-expiring"
+    echo "        certbot --nginx ${domain_args[*]} --non-interactive --agree-tos ${email_args[*]} --redirect --keep-until-expiring"
     return 0
   fi
 
@@ -135,6 +150,7 @@ if [ "${MODE}" = "--nginx-only" ]; then
   API_BIND_PORT=${API_BIND_PORT:-8000}
   API_DOMAIN=$(env_value "CLOUDHAND_API_DOMAIN" "${ENV_FILE}")
   CERTBOT_EMAIL=$(env_value "CERTBOT_EMAIL" "${ENV_FILE}")
+  CERTBOT_UNSAFE_NO_EMAIL=$(env_value "CERTBOT_UNSAFE_NO_EMAIL" "${ENV_FILE}")
 
   echo "==> Ensuring nginx is installed..."
   apt-get update
@@ -142,7 +158,7 @@ if [ "${MODE}" = "--nginx-only" ]; then
   systemctl enable nginx || true
   systemctl start nginx || true
 
-  configure_nginx_and_tls "${API_DOMAIN}" "${CERTBOT_EMAIL}" "${API_BIND_PORT}"
+  configure_nginx_and_tls "${API_DOMAIN}" "${CERTBOT_EMAIL}" "${CERTBOT_UNSAFE_NO_EMAIL}" "${API_BIND_PORT}"
   exit 0
 fi
 
@@ -209,6 +225,7 @@ API_BIND_PORT=$(env_value "CLOUDHAND_API_BIND_PORT" "${ENV_FILE}")
 API_BIND_PORT=${API_BIND_PORT:-8000}
 API_DOMAIN=$(env_value "CLOUDHAND_API_DOMAIN" "${ENV_FILE}")
 CERTBOT_EMAIL=$(env_value "CERTBOT_EMAIL" "${ENV_FILE}")
+CERTBOT_UNSAFE_NO_EMAIL=$(env_value "CERTBOT_UNSAFE_NO_EMAIL" "${ENV_FILE}")
 
 
 echo "==> Setting up Python venv..."
@@ -250,13 +267,13 @@ echo "Try locally:"
 echo "  curl -sS http://127.0.0.1:${API_BIND_PORT}/health || true"
 echo ""
 
-configure_nginx_and_tls "${API_DOMAIN}" "${CERTBOT_EMAIL}" "${API_BIND_PORT}"
+configure_nginx_and_tls "${API_DOMAIN}" "${CERTBOT_EMAIL}" "${CERTBOT_UNSAFE_NO_EMAIL}" "${API_BIND_PORT}"
 
 echo "Next steps:"
 echo "1) Edit: ${ENV_FILE}"
 echo "   - Set DATABASE_URL to point at your Postgres (docker compose uses port 5432)"
 echo "   - Set CLOUDHAND_API_KEY (recommended for headless usage)"
-echo "   - Set CERTBOT_EMAIL for Let's Encrypt"
+echo "   - Set CERTBOT_EMAIL for Let's Encrypt (recommended), or set CERTBOT_UNSAFE_NO_EMAIL=1 to register without email"
 echo "   - Set CLOUDHAND_API_DOMAIN (e.g. self-deploy.moshq.com) to auto-configure nginx + TLS"
 echo "   - Set OPENAI_API_KEY if you use LLM plan generation"
 echo ""

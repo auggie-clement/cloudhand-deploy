@@ -63,7 +63,7 @@ sudo nano /opt/cloudhand-control-plane/cloudhand-api/.env
 
 Minimum you should set:
 - `CLOUDHAND_API_KEY` (so you can call the API from a CLI without cookies)
-- `CERTBOT_EMAIL` (Let’s Encrypt registration)
+- `CERTBOT_EMAIL` (Let’s Encrypt registration; or set `CERTBOT_UNSAFE_NO_EMAIL=1` to register without email)
 - `CLOUDHAND_API_DOMAIN` (optional: if you want nginx + HTTPS for the API, e.g. `self-deploy.moshq.com`)
 - `OPENAI_API_KEY` (only needed if you want LLM plan generation via `ch plan`)
 - `DATABASE_URL` (defaults match the docker-compose Postgres)
