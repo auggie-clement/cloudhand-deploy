@@ -18,6 +18,7 @@ env/
 # Secrets
 .env
 .env.*
+!.env.example
 
 # Nested virtualenvs (safety)
 **/.venv/
